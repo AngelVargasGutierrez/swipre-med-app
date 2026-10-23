@@ -102,7 +102,42 @@ if errorlevel 1 (
 echo [OK] Node.js detectado:
 node -v
 
-REM --- 4. Instalar dependencias del frontend ---
+REM --- 4. Verificar / instalar MySQL (MariaDB) ---
+echo.
+echo Verificando MySQL en el puerto 3306...
+powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
+if errorlevel 1 (
+    if "%TIENE_WINGET%"=="1" (
+        echo [AVISO] No se detecto MySQL. Instalando MariaDB automaticamente con winget...
+        echo         ^(puede pedir permiso de administrador: acepta el aviso de Windows^)
+        winget install --id MariaDB.Server -e --silent --accept-package-agreements --accept-source-agreements --override "SERVICENAME=MariaDB PORT=3306 /quiet /norestart"
+        if errorlevel 1 (
+            echo [ERROR] No se pudo instalar MariaDB automaticamente.
+            echo         Instala MySQL o MariaDB manualmente y vuelve a correr este script.
+            pause
+            exit /b 1
+        )
+        ping -n 4 127.0.0.1 >nul
+        powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
+        if errorlevel 1 (
+            echo [ERROR] MariaDB se instalo pero no quedo escuchando en el puerto 3306.
+            echo         Revisa DEPLOYMENT.md ^(dentro de la carpeta %CARPETA%^), seccion
+            echo         "Solucion de problemas comunes".
+            pause
+            exit /b 1
+        )
+        echo [OK] MariaDB instalado y corriendo en el puerto 3306 ^(usuario root, sin contrasena^).
+    ) else (
+        echo [ERROR] No se detecto MySQL en el puerto 3306 ^(y no hay winget para instalarlo solo^).
+        echo         Instala MySQL o MariaDB manualmente y vuelve a correr este script.
+        pause
+        exit /b 1
+    )
+) else (
+    echo [OK] MySQL ya esta activo.
+)
+
+REM --- 5. Instalar dependencias del frontend ---
 cd /d "%PROYECTO%"
 echo.
 echo Instalando dependencias del frontend ^(puede tardar un par de minutos^)...
@@ -113,7 +148,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM --- 5. Instalar dependencias del backend ---
+REM --- 6. Instalar dependencias del backend ---
 echo.
 echo Instalando dependencias del backend...
 cd /d "%PROYECTO%\backend"
@@ -125,7 +160,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM --- 6. Configurar backend\.env si no existe ---
+REM --- 7. Configurar backend\.env si no existe ---
 set PRIMERA_VEZ=0
 if not exist ".env" (
     echo.
@@ -141,7 +176,7 @@ if not exist ".env" (
     echo [OK] backend\.env ya existia, se conserva tal cual esta.
 )
 
-REM --- 7. Poblar la base de datos solo la primera vez ---
+REM --- 8. Poblar la base de datos solo la primera vez ---
 if "%PRIMERA_VEZ%"=="1" (
     echo.
     echo Creando la base de datos y los datos de ejemplo...
@@ -161,7 +196,7 @@ if "%PRIMERA_VEZ%"=="1" (
 
 cd /d "%~dp0"
 
-REM --- 8. Levantar backend y frontend en ventanas separadas ---
+REM --- 9. Levantar backend y frontend en ventanas separadas ---
 echo.
 echo Levantando el backend en una ventana aparte...
 start "SWIPRE-MED - Backend (puerto 3001)" cmd /k "cd /d "%PROYECTO%\backend" && npm start"
