@@ -12,25 +12,73 @@ echo   SWIPRE-MED - Despliegue local
 echo ==============================================
 echo.
 
-REM --- 1. Verificar Node.js ---
+REM --- 0. Verificar winget (necesario para instalar Node.js/Git automaticamente) ---
+where winget >nul 2>nul
+set TIENE_WINGET=1
+if errorlevel 1 set TIENE_WINGET=0
+
+REM --- 1. Verificar Node.js (lo instala solo si falta y hay winget) ---
 where node >nul 2>nul
 if errorlevel 1 (
-    echo [ERROR] No se encontro Node.js instalado.
-    echo         Descargalo desde https://nodejs.org/ y vuelve a correr este script.
-    pause
-    exit /b 1
+    if "%TIENE_WINGET%"=="1" (
+        echo [AVISO] No se encontro Node.js. Instalando automaticamente con winget...
+        echo         ^(puede pedir permiso de administrador: acepta el aviso de Windows^)
+        winget install --id OpenJS.NodeJS.LTS -e --silent --accept-package-agreements --accept-source-agreements
+        if errorlevel 1 (
+            echo [ERROR] No se pudo instalar Node.js automaticamente.
+            echo         Descargalo manualmente desde https://nodejs.org/ y vuelve a correr este script.
+            pause
+            exit /b 1
+        )
+        echo [OK] Node.js instalado correctamente.
+        echo.
+        echo Cierra esta ventana y vuelve a hacer doble clic en desplegar.bat
+        echo para que Windows reconozca el nuevo Node.js instalado.
+        pause
+        exit /b 0
+    ) else (
+        echo [ERROR] No se encontro Node.js instalado ^(y no hay winget para instalarlo solo^).
+        echo         Descargalo desde https://nodejs.org/ y vuelve a correr este script.
+        pause
+        exit /b 1
+    )
 )
 echo [OK] Node.js detectado:
 node -v
 
-REM --- 2. Verificar MySQL en el puerto 3306 ---
+REM --- 2. Verificar Git (opcional, solo para comodidad; no bloquea el resto) ---
+where git >nul 2>nul
+if errorlevel 1 (
+    if "%TIENE_WINGET%"=="1" (
+        echo.
+        echo [AVISO] No se encontro Git. Instalando automaticamente con winget...
+        winget install --id Git.Git -e --silent --accept-package-agreements --accept-source-agreements >nul 2>nul
+        if errorlevel 1 (
+            echo [AVISO] No se pudo instalar Git automaticamente ^(no es bloqueante, puedes seguir^).
+            echo          Descargalo luego desde https://git-scm.com/ si lo necesitas.
+        ) else (
+            echo [OK] Git instalado ^(estara disponible en una terminal nueva^).
+        )
+    )
+) else (
+    echo [OK] Git detectado.
+)
+
+REM --- 3. Verificar MySQL en el puerto 3306 ---
 echo.
 echo Verificando MySQL en el puerto 3306...
 powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
 if errorlevel 1 (
     echo [AVISO] No se detecto MySQL escuchando en el puerto 3306.
-    echo         Abre XAMPP ^(o tu gestor de MySQL^) y dale "Start" a MySQL.
-    echo         Cuando este corriendo, presiona una tecla para continuar...
+    echo         SWIPRE-MED necesita un servidor MySQL. La forma mas simple es XAMPP
+    echo         ^(incluye MySQL listo para usar, sin configuracion^).
+    echo.
+    echo         Abriendo la pagina de descarga de XAMPP en tu navegador...
+    start https://www.apachefriends.org/download.html
+    echo.
+    echo         1. Instala XAMPP ^(todo por defecto^).
+    echo         2. Abre el Panel de Control de XAMPP y dale "Start" a MySQL.
+    echo         3. Vuelve aqui y presiona una tecla para continuar...
     pause >nul
     powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
     if errorlevel 1 (
