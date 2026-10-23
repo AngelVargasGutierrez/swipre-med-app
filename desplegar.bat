@@ -70,15 +70,9 @@ echo Verificando MySQL en el puerto 3306...
 powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
 if errorlevel 1 (
     echo [AVISO] No se detecto MySQL escuchando en el puerto 3306.
-    echo         SWIPRE-MED necesita un servidor MySQL. La forma mas simple es XAMPP
-    echo         ^(incluye MySQL listo para usar, sin configuracion^).
-    echo.
-    echo         Abriendo la pagina de descarga de XAMPP en tu navegador...
-    start https://www.apachefriends.org/download.html
-    echo.
-    echo         1. Instala XAMPP ^(todo por defecto^).
-    echo         2. Abre el Panel de Control de XAMPP y dale "Start" a MySQL.
-    echo         3. Vuelve aqui y presiona una tecla para continuar...
+    echo         Instala XAMPP y dale "Start" a MySQL antes de continuar
+    echo         ^(ver DEPLOYMENT.md, seccion "1. Instalar XAMPP y MySQL"^).
+    echo         Cuando este corriendo, presiona una tecla para continuar...
     pause >nul
     powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
     if errorlevel 1 (

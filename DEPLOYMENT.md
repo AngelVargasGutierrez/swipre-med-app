@@ -7,21 +7,69 @@ Tiempo estimado: 20-30 minutos.
 
 ---
 
-## 1. Requisitos previos
+## 1. Instalar XAMPP y MySQL
 
-Instala esto antes de empezar:
+**Este es el primer paso y hay que hacerlo antes que cualquier otra cosa.** SWIPRE-MED
+necesita un servidor MySQL corriendo en `localhost:3306`, y la forma más simple de tenerlo
+en Windows es con **XAMPP** (incluye MySQL/MariaDB listo para usar, sin configurar nada).
+
+### 1.1. Descargar XAMPP
+
+Entra a <https://www.apachefriends.org/> y descarga el instalador para Windows (la versión
+más reciente sirve).
+
+Captura de pantalla
+
+### 1.2. Instalar XAMPP
+
+Ejecuta el instalador descargado. Durante la instalación:
+
+- Si Windows muestra un aviso de **Control de cuentas de usuario**, acepta.
+- Si aparece un aviso sobre el **Antivirus/UAC**, puedes continuar igual.
+- En la selección de componentes, deja todo marcado por defecto (al menos debe quedar
+  marcado **MySQL**).
+- En la carpeta de instalación, deja la que viene por defecto (`C:\xampp`).
+- Dale **Next** en todas las pantallas hasta que termine, y **Finish** al final.
+
+Captura de pantalla
+
+### 1.3. Abrir el Panel de Control de XAMPP
+
+Al terminar la instalación se abre solo el **Panel de Control de XAMPP** (si no se abre,
+búscalo en el menú de inicio como "XAMPP Control Panel"). Vas a ver una lista de módulos
+(Apache, MySQL, FileZilla, etc.), todos apagados.
+
+Captura de pantalla
+
+### 1.4. Iniciar MySQL
+
+En la fila de **MySQL**, haz clic en el botón **Start**.
+
+Captura de pantalla
+
+Espera unos segundos. El módulo **MySQL** debe quedar resaltado en **verde**, con el botón
+cambiando de "Start" a "Stop" y mostrando el puerto (3306) a la derecha. Eso confirma que
+MySQL ya está corriendo.
+
+Captura de pantalla
+
+> **Importante:** cada vez que reinicies la PC o cierres XAMPP, tienes que volver a abrir el
+> Panel de Control y darle **Start** a MySQL de nuevo antes de usar SWIPRE-MED — XAMPP no
+> arranca automáticamente con Windows a menos que lo configures aparte.
+
+Con esto, MySQL ya queda listo para los pasos siguientes. **No hace falta crear ninguna
+base de datos a mano** — eso lo hace un script más adelante en este manual.
+
+---
+
+## 2. Otros requisitos previos
+
+Instala también esto:
 
 | Herramienta | Versión recomendada | Para qué |
 |---|---|---|
 | **Node.js** | 20 LTS o superior (probado con Node 22) | Correr el frontend (Vite/React) y el backend (Express) |
 | **Git** | Cualquiera reciente | Clonar el repositorio |
-| **MySQL / MariaDB** | 8.x o MariaDB 10.4+ | Base de datos del sistema |
-
-Para MySQL, la forma más simple en Windows es instalar **[XAMPP](https://www.apachefriends.org/)**
-(incluye MySQL/MariaDB + phpMyAdmin, no hace falta configurar nada adicional). También
-sirve una instalación independiente de MySQL Server o MySQL Workbench — lo único que
-importa es que el servidor quede escuchando en `localhost:3306` con un usuario con permisos
-(por defecto se usa `root` sin contraseña).
 
 Verifica las versiones instaladas:
 
@@ -30,9 +78,15 @@ node -v
 npm -v
 ```
 
+> Si usas `desplegar.bat` o `swipre_med_instalacion.bat` (incluidos en este repositorio),
+> Node.js y Git se pueden instalar automáticamente por ti — pero igual puedes instalarlos a
+> mano desde [nodejs.org](https://nodejs.org/) y [git-scm.com](https://git-scm.com/) si lo
+> prefieres. Esos scripts automatizan los pasos 2 al 9 de este manual; **MySQL siempre hay
+> que instalarlo a mano siguiendo el paso 1**, los scripts no lo hacen por ti.
+
 ---
 
-## 2. Clonar el repositorio
+## 3. Clonar el repositorio
 
 ```bash
 git clone <URL_DEL_REPO> SWIPRE-MED
@@ -46,7 +100,7 @@ El proyecto tiene **dos partes independientes**, cada una con su propio `package
 
 ---
 
-## 3. Instalar dependencias
+## 4. Instalar dependencias
 
 Hay que instalar dependencias **dos veces**: una para el frontend y otra para el backend.
 
@@ -60,27 +114,13 @@ npm install
 cd ..
 ```
 
----
-
-## 4. Levantar MySQL
-
-Si usas XAMPP: abre el **Panel de Control de XAMPP** y dale **Start** al módulo **MySQL**.
-Debe quedar en verde/"Running".
-
-Verifica que esté escuchando en el puerto 3306 (opcional, para confirmar):
-
-```bash
-# Windows (PowerShell)
-Get-NetTCPConnection -LocalPort 3306 -State Listen
-```
-
-Si no aparece nada, MySQL no está corriendo — revisa el panel de XAMPP o el servicio de
-MySQL en "Servicios" de Windows.
-
-> **Si ya tienes otro MySQL instalado en la máquina** (por ejemplo el instalador oficial
-> de MySQL Server), puede que ese otro servicio ya esté usando el puerto 3306 y XAMPP no
-> pueda levantar el suyo en el mismo puerto, o viceversa. Revisa la sección
-> [Solución de problemas](#6-solución-de-problemas-comunes) más abajo si tienes dudas.
+> Antes de seguir, confirma que MySQL sigue corriendo (paso 1): en el Panel de Control de
+> XAMPP, **MySQL** debe seguir en verde. Si lo cerraste, dale **Start** de nuevo.
+>
+> **Si ya tienes otro MySQL instalado en la máquina** (por ejemplo el instalador oficial de
+> MySQL Server), puede que ese otro servicio ya esté usando el puerto 3306 y XAMPP no pueda
+> levantar el suyo en el mismo puerto, o viceversa. Revisa la sección
+> [Solución de problemas](#10-solución-de-problemas-comunes) más abajo si tienes dudas.
 
 ---
 
@@ -133,7 +173,7 @@ npm run setup
 
 Esto crea automáticamente la base de datos `swipre_med`, todas las tablas, y carga un set
 de datos de ejemplo: 20 medicamentos y 6 usuarios de prueba (ver tabla de credenciales en
-el paso 8). Si ves al final:
+el paso 9). Si ves al final:
 
 ```
 🎉 ¡Setup completo! Base de datos SIPGIMED lista.
