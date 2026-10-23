@@ -64,26 +64,6 @@ if errorlevel 1 (
     echo [OK] Git detectado.
 )
 
-REM --- 3. Verificar MySQL en el puerto 3306 ---
-echo.
-echo Verificando MySQL en el puerto 3306...
-powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
-if errorlevel 1 (
-    echo [AVISO] No se detecto MySQL escuchando en el puerto 3306.
-    echo         Instala XAMPP y dale "Start" a MySQL antes de continuar
-    echo         ^(ver DEPLOYMENT.md, seccion "1. Instalar XAMPP y MySQL"^).
-    echo         Cuando este corriendo, presiona una tecla para continuar...
-    pause >nul
-    powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
-    if errorlevel 1 (
-        echo [ERROR] MySQL sigue sin responder en el puerto 3306.
-        echo         Revisa DEPLOYMENT.md, seccion "Solucion de problemas comunes".
-        pause
-        exit /b 1
-    )
-)
-echo [OK] MySQL esta activo.
-
 REM --- 3. Instalar dependencias del frontend ---
 echo.
 echo Instalando dependencias del frontend (puede tardar un par de minutos)...

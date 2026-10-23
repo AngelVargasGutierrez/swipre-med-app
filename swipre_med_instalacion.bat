@@ -102,29 +102,7 @@ if errorlevel 1 (
 echo [OK] Node.js detectado:
 node -v
 
-REM --- 4. Verificar MySQL en el puerto 3306 ---
-echo.
-echo Verificando MySQL en el puerto 3306...
-powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
-if errorlevel 1 (
-    echo [AVISO] No se detecto MySQL escuchando en el puerto 3306.
-    echo         Instala XAMPP y dale "Start" a MySQL antes de continuar
-    echo         ^(ver DEPLOYMENT.md ^(dentro de la carpeta %CARPETA%^), seccion
-    echo         "1. Instalar XAMPP y MySQL"^).
-    echo         Cuando este corriendo, presiona una tecla para continuar...
-    pause >nul
-    powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
-    if errorlevel 1 (
-        echo [ERROR] MySQL sigue sin responder en el puerto 3306.
-        echo         Revisa DEPLOYMENT.md ^(dentro de la carpeta %CARPETA%^), seccion
-        echo         "Solucion de problemas comunes".
-        pause
-        exit /b 1
-    )
-)
-echo [OK] MySQL esta activo.
-
-REM --- 5. Instalar dependencias del frontend ---
+REM --- 4. Instalar dependencias del frontend ---
 cd /d "%PROYECTO%"
 echo.
 echo Instalando dependencias del frontend ^(puede tardar un par de minutos^)...
@@ -135,7 +113,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM --- 6. Instalar dependencias del backend ---
+REM --- 5. Instalar dependencias del backend ---
 echo.
 echo Instalando dependencias del backend...
 cd /d "%PROYECTO%\backend"
@@ -147,7 +125,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM --- 7. Configurar backend\.env si no existe ---
+REM --- 6. Configurar backend\.env si no existe ---
 set PRIMERA_VEZ=0
 if not exist ".env" (
     echo.
@@ -163,7 +141,7 @@ if not exist ".env" (
     echo [OK] backend\.env ya existia, se conserva tal cual esta.
 )
 
-REM --- 8. Poblar la base de datos solo la primera vez ---
+REM --- 7. Poblar la base de datos solo la primera vez ---
 if "%PRIMERA_VEZ%"=="1" (
     echo.
     echo Creando la base de datos y los datos de ejemplo...
@@ -183,7 +161,7 @@ if "%PRIMERA_VEZ%"=="1" (
 
 cd /d "%~dp0"
 
-REM --- 9. Levantar backend y frontend en ventanas separadas ---
+REM --- 8. Levantar backend y frontend en ventanas separadas ---
 echo.
 echo Levantando el backend en una ventana aparte...
 start "SWIPRE-MED - Backend (puerto 3001)" cmd /k "cd /d "%PROYECTO%\backend" && npm start"
